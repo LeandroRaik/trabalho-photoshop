@@ -84,10 +84,10 @@ def applyEffect(originalfile,tmp_file,event,values,window):
     else:
         Effects[event](originalfile, factor, tmp_file)
 
-    Image = Image.open(tmp_file)
-    Image.thumbnail((500,500))
+    image = Image.open(tmp_file)
+    image.thumbnail((500,500))
     bio = io.BytesIO()
-    Image.save(bio, "png")
+    image.save(bio, "png")
     window["-IMAGE-"].erase()
     window["-IMAGE-"].draw_image(data=bio.getvalue(), location=(0,400))
 
@@ -144,12 +144,18 @@ def openImage(temp_file,event,window):
         filename = sg.popup_get_file('Get File')
         image = Image.open(filename)
         image.save(temp_file)
+        showImage(image, window)
+        return filename
     else:
         url = sg.popup_get_text("Coloque a URL")
         image = requests.get(url)
         image = Image.open(io.BytesIO(image.content))
-    showImage(image, window)
-    return filename
+        image.save(temp_file)
+        showImage(image, window)
+        return "WEB-IMAGE"
+    
+
+    
 
 def showImage(Image, window):
     Image.thumbnail((500,500))
@@ -295,8 +301,10 @@ def main():
 
             if event in ["P/B","Color Quantity","Sepia",
             'Brightness','colors','Contrast','Sharpness']:
-                window.Element('-TEXT-').update(event)
-                actualeffect = event      
+                
+                
+                actualeffect = event
+                applyEffect(filename,tmp_file,actualeffect,values,window)     
 
             if event in ['SBlur','BoxBlur','GaussianBlur','Contour','Detail',
             'Edge Enhance','Emboss','Find Edges','Sharpen','Smooth',
